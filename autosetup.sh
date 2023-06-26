@@ -30,7 +30,7 @@ if [ "$(id -u)" != "0" ]; then
 	exit 1
 fi
 echo "Installing packages..."
-pacman -S --noconfirm --needed sudo git base-devel rsync
+pacman -S --noconfirm --needed sudo git base-devel rsync pipewire pipewire-pulse pavucontrol
 
 echo "Adding user and sudo setup"
 groupadd -r sudo
