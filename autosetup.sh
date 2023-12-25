@@ -398,7 +398,7 @@ EOF
 	# just in case
 	chmod +x /mnt/autosetup.sh
 
-	cat << EOF > /etc/systemd/system/autosetup.service
+	cat << EOF > /mnt/etc/systemd/system/autosetup.service
 [Service]
 User=root
 ExecStart=/autosetup.sh --rm
