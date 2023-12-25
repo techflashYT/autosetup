@@ -328,7 +328,7 @@ EOF
 	echo "pacman.conf set up.  running \`pacstrap'."
 
 	# install core packages
-	pacstrap -K /mnt base linux linux-firmware
+	pacstrap -K /mnt base linux linux-firmware grub
 
 	# copy our pacman config over
 	cp /etc/pacman.conf /mnt/etc/pacman.conf
@@ -372,7 +372,9 @@ EOF
 	arch-chroot /mnt mkinitcpio -P
 
 	echo "Please set the root password"
-	arch-chroot /mnt passwd
+	until arch-chroot /mnt passwd; do
+		echo "Password set failed.  Please try again."
+	done
 
 	echo "Installing GRUB to the disk of the RootFS."
 	if [ "$uefi" = "true" ]; then
