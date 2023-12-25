@@ -41,4 +41,12 @@ passwd techflash
 echo "Running dotfiles setup"
 
 
+echo "Adding autologin to getty config"
+mkdir /etc/systemd/system/getty@tty1.service.d
+cat << EOF > /etc/systemd/system/getty@tty1.service.d/autologin.config
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -o '-p -f -- \\\\u' --noclear --autologin techflash %I \$TERM
+EOF
+
 
