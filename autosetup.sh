@@ -381,6 +381,10 @@ EOF
 	if [ "$uefi" = "true" ]; then
 		arch-chroot /mnt pacman -S --noconfirm --needed efibootmgr
 		arch-chroot /mnt grub-install --efi-directory=/boot
+
+		echo "WORKAROUND FOR BROKEN UEFIs: Copying /boot/EFI/arch/grubx64.efi to /boot/EFI/Boot/bootx64.efi"
+		mkdir /boot/EFI/Boot
+		cp /boot/EFI/arch/grubx64.efi /boot/EFI/Boot/bootx64.efi
 	else
 		arch-chroot /mnt grub-install $(partToDisk "$rootfs")
 	fi
