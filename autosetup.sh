@@ -379,6 +379,7 @@ EOF
 
 	echo "Installing GRUB to the disk of the RootFS."
 	if [ "$uefi" = "true" ]; then
+		arch-chroot /mnt pacman -S --noconfirm --needed efibootmgr
 		arch-chroot /mnt grub-install --efi-directory=/boot
 	else
 		arch-chroot /mnt grub-install $(partToDisk "$rootfs")
