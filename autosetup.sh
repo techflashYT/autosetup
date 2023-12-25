@@ -191,12 +191,12 @@ EOF
 
 	# unmount rootfs
 	if mount | grep "$rootfs"; then
-		umount "$rootfs"
+		umount "$rootfs" -R
 	fi
 
 	# unmount ESP
 	if [ "$uefi" = "true" ] && mount | grep "$esp"; then
-		umount "$esp"
+		umount "$esp" -R
 	fi
 
 
