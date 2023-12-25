@@ -341,7 +341,7 @@ EOF
 	ln -sf /usr/share/zoneinfo/Region/City /mnt/etc/localtime
 	
 	# set the clock
-	arch-chroot /mnt "hwclock --systohc"
+	arch-chroot /mnt hwclock --systohc
 
 	# set up locale.gen
 	sed 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' -i /mnt/etc/locale.gen
@@ -369,25 +369,25 @@ EOF
 	rm /mnt/boot/init*
 
 	# rebuild the new, only default initramfs
-	arch-chroot /mnt "mkinitcpio -P"
+	arch-chroot /mnt mkinitcpio -P
 
 	echo "Please set the root password"
-	arch-chroot /mnt "passwd"
+	arch-chroot /mnt passwd
 
 	echo "Installing GRUB to the disk of the RootFS."
 	if [ "$uefi" = "true" ]; then
-		arch-chroot /mnt "grub-install --efi-directory=/boot"
+		arch-chroot /mnt grub-install --efi-directory=/boot
 	else
-		arch-chroot /mnt "grub-install $(partToDisk "$rootfs")"
+		arch-chroot /mnt grub-install $(partToDisk "$rootfs")
 	fi
 
 	echo "Installing NetworkManager for networking after bootup."
-	arch-chroot /mnt "pacman -S networkmanager --noconfirm --neeeded"
+	arch-chroot /mnt pacman -S networkmanager --noconfirm --neeeded
 
 	echo "Enabling NetworkManager and disabling systemd-networkd and resolved."
-	arch-chroot /mnt "systemctl disable systemd-networkd"
-	arch-chroot /mnt "systemctl disable systemd-resolved"
-	arch-chroot /mnt "systemctl enable NetworkManager"
+	arch-chroot /mnt systemctl disable systemd-networkd
+	arch-chroot /mnt systemctl disable systemd-resolved
+	arch-chroot /mnt systemctl enable NetworkManager
 
 	echo "Installing ourselves into the installed system so that we can run through a little bit more setup after a reboot."
 	cp "$ourself" /mnt/autosetup.sh
@@ -409,7 +409,7 @@ EOF
 	done
 	
 	if [ "$autostart" = "y" ]; then
-		arch-chroot /mnt "systemctl enable autosetup"
+		arch-chroot /mnt systemctl enable autosetup
 	fi
 
 	echo "Rebooting.  See ya on the other side!"
