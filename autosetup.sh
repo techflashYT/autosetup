@@ -20,6 +20,7 @@ dots "4" "."
 dots "\e[1;33m3" "."
 dots "\e[0;33m2" "."
 dots "\e[31m1" "!"
+echo -e "\x1b[0m"
 
 
 hostname="$(cat /etc/hostname)"
@@ -256,6 +257,8 @@ EOF
 	done
 
 	if [ "$useCache" = "y" ]; then
+		# could resolved
+		rm /etc/resolv.conf
 		cat << EOF > /etc/resolv.conf
 search shack.techflash.wtf
 nameserver 172.16.5.254
@@ -270,16 +273,16 @@ EOF
 			sed -n '/\[core-testing\]/q;p' -i /etc/pacman.conf
 			cat << EOF >> /etc/pacman.conf
 #[core-testing]
-#Server = http://arch:9129/repo/archlinux/$repo/os/$arch
+#Server = http://arch:9129/repo/archlinux/\$repo/os/\$arch
 
 [core]
-Server = http://arch:9129/repo/archlinux/$repo/os/$arch
+Server = http://arch:9129/repo/archlinux/\$repo/os/\$arch
 
 #[extra-testing]
-#Server = http://arch:9129/repo/archlinux/$repo/os/$arch
+#Server = http://arch:9129/repo/archlinux/\$repo/os/\$arch
 
 [extra]
-Server = http://arch:9129/repo/archlinux/$repo/os/$arch
+Server = http://arch:9129/repo/archlinux/\$repo/os/\$arch
 EOF
 		fi
 
