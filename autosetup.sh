@@ -385,7 +385,7 @@ EOF
 	fi
 
 	echo "Installing NetworkManager for networking after bootup."
-	arch-chroot /mnt pacman -S networkmanager --noconfirm --neeeded
+	arch-chroot /mnt pacman -S networkmanager --noconfirm --needed
 
 	echo "Enabling NetworkManager and disabling systemd-networkd and resolved."
 	arch-chroot /mnt systemctl disable systemd-networkd
