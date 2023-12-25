@@ -181,7 +181,8 @@ EOF
 	done
 	echo "Alright, installer commencing now!"
 	# Unmount any disks that may be mounted
-	 
+	
+	umount -R /mnt &> /dev/null
 	# swapoff the swap partition
 	if [[ "$swap" = "/dev/"* ]]; then
 		if swapon | grep "$swap"; then
@@ -190,13 +191,13 @@ EOF
 	fi
 
 	# unmount rootfs
-	if mount | grep "$rootfs"; then
-		umount "$rootfs" -R
+	if mount | grep "$rootfs" &> /dev/null; then
+		umount "$rootfs"
 	fi
 
 	# unmount ESP
-	if [ "$uefi" = "true" ] && mount | grep "$esp"; then
-		umount "$esp" -R
+	if [ "$uefi" = "true" ] && mount | grep "$esp" &> /dev/null; then
+		umount "$esp"
 	fi
 
 
