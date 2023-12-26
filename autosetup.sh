@@ -379,12 +379,15 @@ EOF
 
 	echo "Installing GRUB to the disk of the RootFS."
 	if [ "$uefi" = "true" ]; then
+		echo "installing efibootmgr"
 		arch-chroot /mnt pacman -S --noconfirm --needed efibootmgr
-		arch-chroot /mnt grub-install --efi-directory=/boot
-
-		echo "WORKAROUND FOR BROKEN UEFIs: Copying /boot/EFI/arch/grubx64.efi to /boot/EFI/Boot/bootx64.efi"
-		mkdir /boot/EFI/Boot
-		cp /boot/EFI/arch/grubx64.efi /boot/EFI/Boot/bootx64.efi
+		echo "installing grub"
+		if ! arch-chroot /mnt grub-install --efi-directory=/boot; then
+			echo "ERROR: grub-install failed!  The error should be above."
+			sleep 30
+		fi
+			
+		arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 	else
 		arch-chroot /mnt grub-install $(partToDisk "$rootfs")
 	fi
