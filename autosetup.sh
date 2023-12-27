@@ -235,6 +235,7 @@ EOF
 	rm -rf /mnt/*
 
 	mount "$rootfs" /mnt
+	fstrim /mnt
 
 	if [ "$uefi" = "true" ]; then
 		mount "$esp" /mnt/boot --mkdir
@@ -400,13 +401,13 @@ EOF
 			sleep 30
 		fi
 
-		sed 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=1/' -i /mnt/etc/default/grub
-		sed 's/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet net.ifnames=0 biosdevname=0"/' -i /mnt/etc/default/grub
-			
-		arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 	else
 		arch-chroot /mnt grub-install $(partToDisk "$rootfs")
 	fi
+	sed 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=1/' -i /mnt/etc/default/grub
+	sed 's/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet net.ifnames=0 biosdevname=0"/' -i /mnt/etc/default/grub
+			
+	arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 	echo "Installing NetworkManager for networking after bootup."
 	arch-chroot /mnt pacman -S networkmanager --noconfirm --needed
