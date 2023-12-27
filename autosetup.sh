@@ -125,7 +125,7 @@ partSwap() {
 partToDisk() {
 	if [[ "$1" == "/dev/nvme"* ]] || [[ "$1" == "/dev/mmcblk"* ]]; then
 		echo "${1//p[0-9]/}"
-	elif [[ "$1" = "/dev/sd"* ]]; then
+	elif [[ "$1" = "/dev/sd"* ]] || [[ "$1" = "/dev/vd"* ]]; then
 		echo "${1//[0-9]}"
 	fi
 }
