@@ -456,7 +456,7 @@ EOF
 # This is reachable via the variable call
 # shellcheck disable=SC2317
 desktopSetup() {
-	pacman -S --noconfirm --needed sudo base-deve\
+	pacman -S --noconfirm --needed sudo base-devel \
 	pipewire pipewire-pulse pavucontrol 
 	
 	echo "Adding user and sudo setup"
@@ -504,7 +504,7 @@ mainSetup() {
 	fi
 
 	until [ "$setuptype" = "desktop" ] || [ "$setuptype" = "server" ]; do
-		echo -n "Setup type?  \"desktop\" or \"server\""; read -r setuptype
+		echo -n "Setup type?  \"desktop\" or \"server\": "; read -r setuptype
 	done
 	echo "Installing packages..."
 	pacman -S --needed --noconfirm git rsync htop
