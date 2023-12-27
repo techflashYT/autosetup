@@ -457,7 +457,7 @@ EOF
 # shellcheck disable=SC2317
 desktopSetup() {
 	pacman -S --noconfirm --needed sudo base-devel \
-	pipewire pipewire-pulse pavucontrol 
+	pipewire pipewire-pulse pavucontrol xorg-server xorg-xinit
 	
 	echo "Adding user and sudo setup"
 	
@@ -467,7 +467,7 @@ desktopSetup() {
 	
 	sed -i 's/# %sudo	ALL=(ALL:ALL) ALL/%sudo	ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
 
-	if ! [ -d /home/techflash ] || [ "$(su - techflash -c groups 2>/dev/null | grep users | grep sudo | grep video | grep render)" != "" ]; then
+	if ! [ -d /home/techflash ] || [ "$(su - techflash -c groups 2>/dev/null | grep users | grep sudo | grep video | grep render)" == "" ]; then
 		useradd -m techflash -c Techflash -G users,sudo,video,render
 	fi
 	echo "Please enter the password for the new user"
@@ -486,11 +486,18 @@ desktopSetup() {
 
 	echo "Adding autologin to getty config"
 	mkdir -p /etc/systemd/system/getty@tty1.service.d
-	cat << EOF > /etc/systemd/system/getty@tty1.service.d/autologin.config
+	cat << EOF > /etc/systemd/system/getty@tty1.service.d/autologin.conf
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty -o '-p -f -- \\\\u' --noclear --autologin techflash %I \$TERM
 EOF
+	echo "DONE!  Restarting getty in 5 seconds!"
+	sleep 5
+
+	systemctl disable autosetup
+	systemctl daemon-reload
+	systemctl enable --now getty@tty1
+	exit 0
 }
 
 # shellcheck disable=SC2317
