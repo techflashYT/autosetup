@@ -460,9 +460,16 @@ desktopSetup() {
 	pipewire pipewire-pulse pavucontrol 
 	
 	echo "Adding user and sudo setup"
-	groupadd -r sudo
+	
+	if ! grep sudo /etc/group; then
+		groupadd -r sudo
+	fi
+	
 	sed -i 's/# %sudo	ALL=(ALL:ALL) ALL/%sudo	ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
-	useradd -m techflash -c Techflash -G users,sudo,video,render
+
+	if ! [ -d /home/techflash ] || [ "$(su - techflash -c groups 2>/dev/null | grep users | grep sudo | grep video | grep render)" != "" ]; then
+		useradd -m techflash -c Techflash -G users,sudo,video,render
+	fi
 	echo "Please enter the password for the new user"
 	passwd techflash
 
