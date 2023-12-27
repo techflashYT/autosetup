@@ -475,6 +475,7 @@ desktopSetup() {
 
 	echo "Running dotfiles setup"
 	su - techflash -c "mkdir -p src"
+	chsh -s /bin/zsh techflash
 	
 	if ! [ -d /home/techflash/src/dotfiles ]; then
 		su - techflash -c "git clone https://github.com/techflashYT/dotfiles src/dotfiles"
