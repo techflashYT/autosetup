@@ -467,13 +467,13 @@ desktopSetup() {
 	passwd techflash
 
 	echo "Running dotfiles setup"
-	su - techflash -c "mkdir src"
+	su - techflash -c "mkdir -p src"
 	su - techflash -c "git clone https://github.com/techflashYT/dotfiles src/dotfiles"
 	su - techflash -c "cd src/dotfiles; ./install.sh"
 
 
 	echo "Adding autologin to getty config"
-	mkdir /etc/systemd/system/getty@tty1.service.d
+	mkdir -p /etc/systemd/system/getty@tty1.service.d
 	cat << EOF > /etc/systemd/system/getty@tty1.service.d/autologin.config
 [Service]
 ExecStart=
