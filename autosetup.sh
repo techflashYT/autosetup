@@ -32,14 +32,14 @@ dots "\e[31m1" "!"
 echo -e "\x1b[0m"
 
 
-hostname="$(cat /etc/hostname)"
+hostname_initial="$(cat /etc/hostname)"
 if [ -f /etc/motd ]; then
 	awk '/iwctl/ && /nmcli/ && /utility/ && /Wi-Fi, authenticate to the wireless network using the/' /etc/motd
 fi
 awkRet=$?
 
 isArchISO=false
-if [ "$hostname" = "archiso" ] && [ "$awkRet" = "0" ]; then
+if [ "$hostname_initial" = "archiso" ] && [ "$awkRet" = "0" ]; then
 	isArchISO=true
 fi
 
@@ -368,6 +368,7 @@ EOF
 
 
 	# set the system hostname
+	
 	if [ "$hostname" = "" ]; then
 		echo -n "Please enter the system hostname: "; read -r hostname
 	fi
