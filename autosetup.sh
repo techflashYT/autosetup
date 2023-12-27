@@ -1,6 +1,15 @@
 #!/bin/bash -e
 ourself="$PWD/$0"
 
+if [ "$(tty)" != "/dev/tty1" ]; then
+	# set stuff up
+	systemctl disable --now getty@tty1
+	
+	# boot up a new instance on TTY1
+	setsid sh -c 'exec /autosetup.sh <> /dev/tty1 >&0 2>&1'
+	exit 0
+fi
+
 dots() {
 	echo -ne "$1"
 	sleep 0.25
@@ -24,7 +33,9 @@ echo -e "\x1b[0m"
 
 
 hostname="$(cat /etc/hostname)"
-awk '/iwctl/ && /nmcli/ && /utility/ && /Wi-Fi, authenticate to the wireless network using the/' /etc/motd
+if [ -f /etc/motd ]; then
+	awk '/iwctl/ && /nmcli/ && /utility/ && /Wi-Fi, authenticate to the wireless network using the/' /etc/motd
+fi
 awkRet=$?
 
 isArchISO=false
@@ -356,7 +367,9 @@ EOF
 
 
 	# set the system hostname
-	echo -n "Please enter the system hostname: "; read -r hostname
+	if [ "$hostname" = "" ]; then
+		echo -n "Please enter the system hostname: "; read -r hostname
+	fi
 	echo "$hostname" > /mnt/etc/hostname
 
 	# disable fallback initramfs
@@ -386,6 +399,9 @@ EOF
 			echo "ERROR: grub-install failed!  The error should be above."
 			sleep 30
 		fi
+
+		sed 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=1/' -i /mnt/etc/default/grub
+		sed 's/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"/GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet net.ifnames=0 biosdevname=0"/' -i /mnt/etc/default/grub
 			
 		arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 	else
@@ -435,25 +451,26 @@ EOF
 #   I N S T A L L E D   O S   S E T U P   #
 #                                         #
 ###########################################
-mainSetup() {
-	echo -e "\n\e[0mInstalling..."
-	if [ "$(id -u)" != "0" ]; then
-		echo -e "\e[31mERROR: You must be root to run this script"
-		exit 1
-	fi
-	echo "Installing packages..."
-	pacman -S --noconfirm --needed sudo git base-devel rsync \
+
+
+# This is reachable via the variable call
+# shellcheck disable=SC2317
+desktopSetup() {
+	pacman -S --noconfirm --needed sudo base-deve\
 	pipewire pipewire-pulse pavucontrol 
-
-
+	
 	echo "Adding user and sudo setup"
 	groupadd -r sudo
 	sed -i 's/# %sudo	ALL=(ALL:ALL) ALL/%sudo	ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
-	useradd -m techflash -c Techflash -G users,sudo,plugdev,video,render
+	useradd -m techflash -c Techflash -G users,sudo,video,render
 	echo "Please enter the password for the new user"
 	passwd techflash
 
 	echo "Running dotfiles setup"
+	su - techflash -c "mkdir src"
+	su - techflash -c "git clone https://github.com/techflashYT/dotfiles src/dotfiles"
+	su - techflash -c "cd src/dotfiles; ./install.sh"
+
 
 	echo "Adding autologin to getty config"
 	mkdir /etc/systemd/system/getty@tty1.service.d
@@ -462,6 +479,36 @@ mainSetup() {
 ExecStart=
 ExecStart=-/sbin/agetty -o '-p -f -- \\\\u' --noclear --autologin techflash %I \$TERM
 EOF
+}
+
+# shellcheck disable=SC2317
+serverSetup() {
+	# TODO
+	echo
+}
+mainSetup() {
+	export TERM=linux
+	echo "Checking networking config..."
+	until cat /etc/NetworkManager/system-connections/* | grep '172\.16\.5\.254'; do
+		echo "No DNS set up.  Go fix it yourself"
+		sleep 2
+		nmtui
+		echo "Restarting NetworkManager"
+		systemctl restart NetworkManager
+	done
+
+	echo -e "\n\e[0mInstalling..."
+	if [ "$(id -u)" != "0" ]; then
+		echo -e "\e[31mERROR: You must be root to run this script"
+		exit 1
+	fi
+
+	until [ "$setuptype" = "desktop" ] || [ "$setuptype" = "server" ]; do
+		echo -n "Setup type?  \"desktop\" or \"server\""; read -r setuptype
+	done
+	echo "Installing packages..."
+	pacman -S --needed --noconfirm git rsync htop
+	"${setuptype}"Setup
 
 
 	if [ "$1" = "--rm" ]; then
@@ -469,13 +516,10 @@ EOF
 	fi
 }
 
-
-
-
 if [ "$isArchISO" = "true" ]; then
-	installerSetup $1
+	installerSetup
 	exit 0
 fi
 
-mainSetup $1
+mainSetup "$1"
 exit 0
