@@ -494,13 +494,6 @@ desktopSetup() {
 ExecStart=
 ExecStart=-/sbin/agetty -o '-p -f -- \\\\u' --noclear --autologin techflash %I \$TERM
 EOF
-	echo "DONE!  Restarting getty in 5 seconds!"
-	sleep 5
-
-	systemctl disable autosetup
-	systemctl daemon-reload
-	systemctl enable --now getty@tty1
-	exit 0
 }
 
 # shellcheck disable=SC2317
@@ -532,10 +525,17 @@ mainSetup() {
 	pacman -S --needed --noconfirm git rsync htop
 	"${setuptype}"Setup
 
+	echo "DONE!  Restarting getty in 5 seconds!"
+	sleep 5
+
+	systemctl disable autosetup
+	systemctl daemon-reload
+	systemctl enable --now getty@tty1
 
 	if [ "$1" = "--rm" ]; then
 		rm "$ourself"
 	fi
+	exit 0
 }
 
 if [ "$isArchISO" = "true" ]; then
