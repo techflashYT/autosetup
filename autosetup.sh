@@ -1,6 +1,22 @@
 #!/bin/bash -e
 ourself="$PWD/$0"
 
+hostname_initial="$(cat /etc/hostname)"
+if [ -f /etc/motd ]; then
+	awk '/iwctl/ && /nmcli/ && /utility/ && /Wi-Fi, authenticate to the wireless network using the/' /etc/motd
+fi
+awkRet=$?
+
+isArchISO=false
+if [ "$hostname_initial" = "archiso" ] && [ "$awkRet" = "0" ]; then
+	isArchISO=true
+fi
+if [ "$(uname -a | grep -v Linux)" != "" ]; then
+	echo "Why are you not on Linux?"
+	exit 1
+fi
+
+
 if [ "$(tty)" != "/dev/tty1" ]; then
 	# set stuff up
 	systemctl disable --now getty@tty1
@@ -32,16 +48,6 @@ dots "\e[31m1" "!"
 echo -e "\x1b[0m"
 
 
-hostname_initial="$(cat /etc/hostname)"
-if [ -f /etc/motd ]; then
-	awk '/iwctl/ && /nmcli/ && /utility/ && /Wi-Fi, authenticate to the wireless network using the/' /etc/motd
-fi
-awkRet=$?
-
-isArchISO=false
-if [ "$hostname_initial" = "archiso" ] && [ "$awkRet" = "0" ]; then
-	isArchISO=true
-fi
 
 toBytes() {
 	echo $1 | sed 's/.*/\L\0/;s/t/Xg/;s/g/Xm/;s/m/Xk/;s/k/X/;s/b//;s/X/ *1024/g' | bc
