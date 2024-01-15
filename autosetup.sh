@@ -1,5 +1,9 @@
 #!/bin/bash -e
 ourself="$PWD/$0"
+if [ "$(uname -a | grep -v Linux)" != "" ]; then
+	echo "Why are you not on Linux?"
+	exit 1
+fi
 
 hostname_initial="$(cat /etc/hostname)"
 if [ -f /etc/motd ]; then
@@ -11,10 +15,7 @@ isArchISO=false
 if [ "$hostname_initial" = "archiso" ] && [ "$awkRet" = "0" ]; then
 	isArchISO=true
 fi
-if [ "$(uname -a | grep -v Linux)" != "" ]; then
-	echo "Why are you not on Linux?"
-	exit 1
-fi
+
 
 
 if [ "$(tty)" != "/dev/tty1" ]; then
